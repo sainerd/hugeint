@@ -37,18 +37,25 @@ public:
     TeamWorkBigInt operator*(const TeamWorkBigInt&) const;
     TeamWorkBigInt operator/(const TeamWorkBigInt&) const;
     TeamWorkBigInt normaldiv(const TeamWorkBigInt&) const;
-    TeamWorkBigInt& operator/=(const TeamWorkBigInt&) const;
-    TeamWorkBigInt& operator+=(const TeamWorkBigInt&) const;
+    TeamWorkBigInt normalmult(const TeamWorkBigInt&) const;
+    TeamWorkBigInt forehead(const TeamWorkBigInt&)const;
+    TeamWorkBigInt& operator/=(const TeamWorkBigInt&);
+    TeamWorkBigInt& operator+=(const TeamWorkBigInt&);
     TeamWorkBigInt operator*(int) const;
     TeamWorkBigInt operator/(int) const;
-    TeamWorkBigInt& operator/=(int) const;
-    TeamWorkBigInt& operator+=(int) const;
+    TeamWorkBigInt& operator/=(int);
+    TeamWorkBigInt& operator+=(int);
     friend TeamWorkBigInt pow(const TeamWorkBigInt&, int times);
 private:
     short integer[digits] = {0};
     int length = 0;
     int dig = 0;
 }; // end class HugeInt
+TeamWorkBigInt TeamWorkBigInt::forehead(const TeamWorkBigInt&num)const {
+    TeamWorkBigInt temp = num.recopy(1, 2);
+    temp.move(num.dig - 1);
+    return temp;
+}
 
 void TeamWorkBigInt::move(int step) {
     if (length == 0) {
@@ -93,17 +100,34 @@ TeamWorkBigInt TeamWorkBigInt::operator/(int t) const {
     temp = *this / temp;
     return temp;
 }
-TeamWorkBigInt& TeamWorkBigInt::operator/=(int t) const {
+TeamWorkBigInt& TeamWorkBigInt::operator/=(int t) {
     TeamWorkBigInt temp(t);
-    temp = *this / temp;
-    return temp;
+    *this = *this / temp;
+    return *this;
 }
-TeamWorkBigInt& TeamWorkBigInt::operator+=(int t) const {
+TeamWorkBigInt& TeamWorkBigInt::operator+=(int t){
     TeamWorkBigInt temp(t);
-    temp = temp + *this;
-    return temp;
+    *this = temp + *this;
+    return *this;
 }
 TeamWorkBigInt TeamWorkBigInt::operator *(const TeamWorkBigInt& num) const {
+    int i = 1;
+    TeamWorkBigInt temp(0);
+    if (length == 0) {
+        return temp;
+   }
+    while (i <= num.dig) {
+        for (int j = 1; j <= dig; j++) {
+            int t = integer[digits - j] * num.integer[digits - i];
+            TeamWorkBigInt mul(t);
+            mul.move(i + j - 2);
+            temp = temp + mul;
+        }
+        i++;
+    }
+    return temp;
+}
+TeamWorkBigInt TeamWorkBigInt::normalmult(const TeamWorkBigInt&num) const {
     TeamWorkBigInt ticker(1);
     TeamWorkBigInt temp(0);
     TeamWorkBigInt plus(1);
@@ -113,18 +137,26 @@ TeamWorkBigInt TeamWorkBigInt::operator *(const TeamWorkBigInt& num) const {
 
     }
     return temp;
+
 }
+
 TeamWorkBigInt TeamWorkBigInt::div(const TeamWorkBigInt&num) const {
     int i = 1;
     TeamWorkBigInt last(0);
     TeamWorkBigInt temp(0);
     TeamWorkBigInt copy(0);
-    TeamWorkBigInt lastcopy = 0;
+    TeamWorkBigInt lastcopy(0);
     while (i <= dig - num.dig + 1) {
         copy = recopy(i, i + num.dig) + lastcopy;
         last = copy.normaldiv(num);
-        lastcopy = copy - last * num;
-        lastcopy.move(1);
+        lastcopy = copy;
+        lastcopy= lastcopy - last * num;
+        if (lastcopy.dig > 1) {
+            lastcopy = forehead(lastcopy);
+        }
+        
+            lastcopy.move(1);
+        
         last.move(dig - num.dig - i + 1);
         temp = temp + last;
         i++;
@@ -179,13 +211,13 @@ TeamWorkBigInt TeamWorkBigInt::normaldiv(const TeamWorkBigInt& num) const {
     ticker.dig = ticker.getdigits();
     return ticker;
 }
-TeamWorkBigInt& TeamWorkBigInt::operator/=(const TeamWorkBigInt& num) const {
-    TeamWorkBigInt temp = *this / num;
-    return temp;
+TeamWorkBigInt& TeamWorkBigInt::operator/=(const TeamWorkBigInt& num) {
+    *this= *this / num;
+    return *this;
 }
-TeamWorkBigInt& TeamWorkBigInt::operator+=(const TeamWorkBigInt& num) const {
-    TeamWorkBigInt temp = *this + num;
-    return temp;
+TeamWorkBigInt& TeamWorkBigInt::operator+=(const TeamWorkBigInt& num) {
+    *this = *this + num;
+    return *this;
 }
 bool TeamWorkBigInt::operator>(const TeamWorkBigInt& num) const {
     TeamWorkBigInt temp("0");
@@ -243,11 +275,8 @@ int TeamWorkBigInt::getLength() const {
     }
     int len = 0;
     if (i != digits) {
-        
-   
         len = (int)log10(abs(integer[i]))+1 + 4 * (digits-i-1);
     }
-    
     return len;
 };
 TeamWorkBigInt::TeamWorkBigInt(int t) {
@@ -460,35 +489,41 @@ TeamWorkBigInt TeamWorkBigInt::operator-(const char* t) const {
 
 
 
+
 //StudybarCommentBegin
 int main()
 {
     int i, N;
-    TeamWorkBigInt  n = 10, b, x1, x2, s, t, pi,k;
+    TeamWorkBigInt  n = 10, b, x1, x2, s, t, pi;
 
     cin >> N;
     N--;
     b = pow(n, N + 10);
 
-    x1 = b * 4;
-    x1=x1/ 5;
+    x1 = b * 4 / 5;
     x2 = b / -239;
     s = x1 + x2;
-
+    cout << x1 << endl;
+    cout << x2 << endl;
+    cout << s << endl;
     for (i = 3; i <= N * 2; i += 2)
     {
+        cout << "i=" << i << endl;
         x1 /= -25;
+        cout << "x1=" << x1 << endl;
         x2 /= -57121;
+        cout << "x2=" << x2 << endl;
         t = (x1 + x2) / i;
+        cout << "t=" << t << endl;
+        cout << "s=" << s << endl;
         s += t;
+        cout << "s=" << s << endl;
     }
     pi = s * 4;
-    k= pow(n, 10);
-    cout << pi<<endl;
-    cout << k;
-    cout << (pi / k) << endl;
+    cout << "pi=" << pi << endl;
+    cout << pow(n, 10) << endl;
+    cout << (pi / pow(n, 10)) << endl;
     return 0;
 }
 //StudybarCommentEnd
-
 
